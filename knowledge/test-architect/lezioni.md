@@ -39,3 +39,32 @@ aggiunta via PR, merge umano.
   fidarsi trasforma un invariante in una convenzione; esentare e sorvegliare l'esenzione lo
   mantiene tale anche fra sei mesi, quando la premessa non sarà più vera e nessuno se lo
   ricorderà.
+
+- 2026-07-25 — Chiudere una fase a **«debito zero» obbliga a separare due tabelle**: i
+  *finding chiusi* (ognuno con la PR che lo chiude e il **nome** del test di regressione) e i
+  *rischi tracciati* — condizioni note che non violano alcun criterio di accettazione, non
+  hanno un test rosso, ma hanno un **momento preciso di rivalutazione** (al prossimo bump
+  della dipendenza, alla prima messa in esercizio dietro proxy, al secondo uso di quel
+  meccanismo). Un finding si dichiara chiuso solo se puoi citare il test che lo terrebbe
+  chiuso; un rischio si dichiara accettato solo se puoi citare quando lo riguarderai.
+  Perché conta: senza la seconda tabella i rischi noti fanno una delle due brutte fini —
+  inquinano il registro del debito (e allora «debito zero» diventa impossibile da
+  raggiungere e la dichiarazione perde valore), oppure spariscono, e riappaiono mesi dopo
+  come debito nato per dimenticanza. E senza il test nominato accanto a ogni finding chiuso,
+  «chiuso» significa solo «qualcuno ha detto che è a posto»: la dichiarazione di chiusura
+  diventa un atto di fiducia invece che un documento verificabile da chi non c'era.
+
+- 2026-07-25 — **Il conteggio grezzo di `npm audit` non è un dato di qualità**, e il suo
+  `fix` non è un consiglio. Due trappole che vanno smontate ogni volta: (1) l'audit somma
+  toolchain di sviluppo e runtime — un progetto con 14 advisory *high* può averne 3 che
+  arrivano davvero al bundle, e la separazione si legge solo con `npm audit --omit=dev`;
+  (2) `fixAvailable` indica *la versione più vecchia senza advisory*, che per un pacchetto la
+  cui storia è tutta più recente dell'advisory è una versione **precedente** — visto dal vero:
+  `npm audit fix --force` proponeva un downgrade major da `next` 16 a `next` 9 come
+  "correzione". La valutazione utile è sempre la stessa terna: la vulnerabilità è nel
+  runtime o solo negli strumenti? il codice del progetto raggiunge quella superficie? e se
+  non c'è patch, qual è l'**evento** che fa rivalutare (il prossimo bump), non la data?
+  Perché conta: chi mette `npm audit` come gate senza il primo punto blocca i rilasci per
+  advisory che non spediscono; chi applica `--force` senza il secondo rompe il progetto in
+  nome della sicurezza. Entrambi gli errori sono facili da fare in buona fede, e il secondo
+  passa la CI solo perché nessuno guarda quale versione è stata installata.
