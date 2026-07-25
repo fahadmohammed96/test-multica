@@ -68,3 +68,28 @@ aggiunta via PR, merge umano.
   advisory che non spediscono; chi applica `--force` senza il secondo rompe il progetto in
   nome della sicurezza. Entrambi gli errori sono facili da fare in buona fede, e il secondo
   passa la CI solo perché nessuno guarda quale versione è stata installata.
+
+- 2026-07-25 — In ogni sincronizzazione da una sorgente esterna, la regola «l'elemento non è
+  più nel payload ⇒ marcalo rimosso» **va condizionata a un parse completo e validato**, mai
+  applicata al contenuto scaricato così com'è. Un corpo troncato, vuoto con esito 200, o
+  parziale è indistinguibile — per quella regola — da «l'elemento è stato davvero cancellato
+  all'origine»: il risultato è che un errore di **trasporto** diventa una **cancellazione di
+  dati** che si propaga a tutto ciò che dipende da quello stato (derivati che decadono, allarmi
+  che si chiudono, contatori che scendono). Il presidio è un criterio di completezza esplicito
+  — sentinella di fine documento, conteggio coerente, dimensione attesa — e un test per ciascuna
+  forma di troncamento.
+  Perché conta: è l'unico difetto di questa famiglia che **non produce alcun errore visibile**.
+  Il run risulta riuscito, i dati spariscono in silenzio, e la scoperta arriva dall'utente. Ha
+  probabilità alta perché l'implementazione ingenua lo contiene per costruzione: nessuno scrive
+  «se il parse è completo» finché non ha visto una risposta tagliata a metà.
+
+- 2026-07-25 — Un criterio di accettazione che richiede un'**uscita osservabile** (un alert, un
+  contatore, uno stato esposto) **non ha copertura possibile** se la superficie di osservabilità
+  è pianificata in una fase successiva. Non è un problema di priorità dei test: è un AC senza
+  conseguenza verificabile, che finisce inevitabilmente coperto «per ispezione». Quando pianifichi
+  le fasi, controlla per ogni AC che l'uscita su cui si fonda esista nella stessa fase; se non
+  esiste, le opzioni oneste sono due — anticipare il minimo di osservabilità, oppure **de-scopare
+  l'AC per iscritto**. La terza (lasciarlo lì e dichiararlo coperto) è quella che si prende da sola.
+  Perché conta: rende la domanda «anticipiamo l'osservabilità?» decidibile con un argomento
+  tecnico invece che con una preferenza. E toglie di mezzo il caso peggiore, in cui un requisito
+  di affidabilità risulta verde in una matrice di tracciabilità senza che nulla lo verifichi.
