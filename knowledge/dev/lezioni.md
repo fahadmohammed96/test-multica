@@ -41,3 +41,25 @@ aggiunta via PR, merge umano.
   vedere questo difetto, perché la cache non esiste nel loro mondo. Lo trova solo
   un end-to-end che esercita l'app reale: è la giustificazione concreta del costo
   di tenere un e2e full-stack in CI, non un lusso.
+
+- 2026-07-25 — Un freno agli accessi ripetuti (rate limit sul login) va applicato
+  **prima** di verificare le credenziali e **anche per utenze inesistenti**, con
+  la stessa risposta. Serve inoltre più di un asse: per account (utenza presa di
+  mira) **e** per origine (tentativi sparsi su molte utenze, che il solo limite
+  per account non vede mai perché ognuna resta sotto soglia). Sempre a finestra
+  temporale, mai un blocco permanente.
+  Perché conta: frenare solo gli account esistenti reintroduce dalla porta di
+  servizio l'**enumerazione delle utenze** che di solito si è già chiusa altrove
+  (es. rendendo indistinguibile la risposta a credenziali errate) — la
+  contromisura di sicurezza ne annulla un'altra. E le tracce del freno non vanno
+  legate all'utente: si scrivono prima di sapere se esiste.
+
+- 2026-07-25 — Un'attività periodica (purge, retention, promemoria) si fa con la
+  **coda di job durevole**, non con uno scheduler in memoria: l'handler si
+  **riprogramma** alla fine di ogni esecuzione e un **bootstrap idempotente**
+  all'avvio rimette in coda il ciclo se manca.
+  Perché conta: senza riprogrammazione il ciclo muore al primo riavvio; senza
+  bootstrap idempotente ogni riavvio ne accoda un altro e i cicli si moltiplicano.
+  Corollario di dipendenze: il kernel che esegue i job non deve conoscere i
+  moduli applicativi — serve un entrypoint di livello applicativo che importi i
+  moduli (registrandone gli handler) e poi ceda al ciclo generico.
