@@ -63,3 +63,32 @@ aggiunta via PR, merge umano.
   Corollario di dipendenze: il kernel che esegue i job non deve conoscere i
   moduli applicativi — serve un entrypoint di livello applicativo che importi i
   moduli (registrandone gli handler) e poi ceda al ciclo generico.
+
+- 2026-07-25 — La **pipeline di CI è codice privilegiato** — ha accesso al
+  repository, ai segreti e alla rete — e va scritta contro un modello di minaccia
+  fin dal primo workflow, non corretta dopo la prima bocciatura di un quality
+  gate. Checklist minima: action di terze parti **pinnate al commit** (il tag è
+  mutabile); installazione **solo da lockfile** e **senza esecuzione di script**
+  di terze parti; mai il lanciatore che scarica pacchetti on-demand (usare
+  l'esecuzione dal lockfile); il lockfile si verifica con il comando di
+  installazione **riproducibile**, non con quello che lo riscrive; permessi del
+  token di pipeline **dichiarati ed espliciti**, mai quelli di default.
+  Perché conta: retrofittare questa postura costa più giri di quanti ne costi
+  scriverla — le regole si applicano a **ogni** job, quindi correggere solo
+  quello che il gate ha bocciato lascia gli altri rossi al giro successivo. E il
+  difetto peggiore non è quello che il gate segnala: è che finché nessuno guarda,
+  la superficie più esposta del progetto è l'unica scritta senza review di
+  sicurezza.
+
+- 2026-07-25 — Ogni percorso che **legge, decide e poi scrive** con un vincolo
+  (unicità, tetto massimo, transizione di stato) è un difetto di concorrenza
+  finché non è serializzato — non un rischio teorico. Nasce insieme al suo **test
+  di gara**, e il rimedio è al livello che decide davvero: il vincolo del
+  database, oppure un lock preso **prima** della lettura.
+  Perché conta: con due thread l'interleaving spesso non si presenta e il test
+  passa dando falsa sicurezza; serve una manciata di thread rilasciati da una
+  barriera per coglierlo in modo affidabile. Trappola: se il fix è un lock, non
+  strumentare la finestra critica con una barriera interna — va in stallo. E
+  attenzione a chi lo considera un caso di laboratorio: in un progetto lo stesso
+  difetto si è ripresentato identico su un'altra entità a distanza di poche
+  consegne, perché la prima volta era stato corretto senza diventare una regola.
