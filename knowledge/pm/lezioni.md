@@ -42,26 +42,33 @@ aggiunta via PR, merge umano.
   Epic in partenza. L'etichetta di scadenza dice all'umano quanta strada ha
   ancora, e dice a te quando smettere di segnalare e iniziare a escalare.
 
-- 2026-07-25 — Quando un artefatto è **prerequisito** del task che stai per
-  assegnare, il suo merge va messo in coda **prima** del dispatch, non in
-  parallelo. "L'ho consegnato in PR, ti dico io su quale branch guardare" regge
-  un giro e non regge la crescita: chi consuma l'artefatto lo cerca dove
-  l'artefatto vive normalmente — il ramo principale — e lì trova la versione
-  precedente.
-  Perché conta: il fallimento non è un errore, è un **silenzio**. Nessuno vede
-  un messaggio "documento non aggiornato": si legge una versione vecchia
-  credendola l'ultima, e il lavoro che ne discende è sbagliato a valle senza che
-  nessun controllo scatti. Se il merge non può precedere il dispatch, allora il
-  puntatore esatto (branch + file + sezione) è **obbligatorio nel task**, non
-  una cortesia.
+- 2026-07-25 — Il criterio per **avviare** la fase successiva e quello per
+  **chiudere** la precedente non sono lo stesso criterio, e confonderli costa in
+  entrambe le direzioni. Per far partire un lavoro che si appoggia a un documento
+  basta che il documento sia **consegnato** — leggibile, anche solo su un branch
+  in PR; per dichiarare **chiusa** la fase serve che sia **integrato** nel ramo
+  principale. Quando sblocchi sul contenuto, l'handoff deve dire **dove** si
+  legge (ref, percorso, sezione): è obbligatorio, non una cortesia.
+  Perché conta: legare l'avvio al merge serializza l'intera squadra dietro una
+  persona; legare la chiusura al contenuto consegnato mette agli atti fasi che il
+  repository smentisce. E senza il puntatore esatto il fallimento non è un
+  errore, è un **silenzio**: chi consuma l'artefatto lo cerca dove l'artefatto
+  vive normalmente — il ramo principale — vi trova la versione precedente
+  credendola l'ultima, e nessun controllo scatta. Un gate umano è un collo di
+  bottiglia inevitabile solo dove serve davvero: sull'integrazione, non sulla
+  lettura.
 
-- 2026-07-25 — **"Zero PR aperte" non significa "tutte mergiate".** Una PR chiusa
-  senza merge sparisce dall'elenco delle aperte esattamente come una mergiata,
-  quindi il conteggio non distingue i due casi. Una consegna si verifica sul
-  **contenuto nel ramo principale** — il commit è antenato di `main`? il file
-  esiste lì? — non sullo stato di una lista.
-  Perché conta: è il modo più economico per mettere agli atti una chiusura che
-  il repository smentisce, e nessuno se ne accorge finché qualcuno non clona il
-  progetto e non trova ciò che era stato dichiarato consegnato. Il controllo
-  costa dieci secondi e va fatto **prima** di marcare qualcosa come chiuso, non
-  dopo: è l'unico momento in cui è ancora gratis.
+- 2026-07-25 — Prima di **marcare done**, verifica la proprietà osservabile
+  dell'artefatto e non il conteggio che la riassume: il commit è antenato del
+  ramo di destinazione? il file esiste lì? In particolare **"zero PR aperte" non
+  significa "tutte mergiate"** — una PR chiusa senza merge sparisce dall'elenco
+  delle aperte esattamente come una mergiata, e il conteggio resta identico.
+  Vale anche quando la conferma arriva da chi ha l'autorità di darla: l'errore
+  tipico è in buona fede, dentro un riassunto di stato, non nella catena di
+  comando.
+  Perché conta: chiudere è l'unica azione che mette un fatto **agli atti**, e se
+  il fatto non è vero il progetto acquisisce una falsa chiusura proprio nel punto
+  in cui nessuno guarderà più — mentre il lavoro consegnato ma non mergiato resta
+  a marcire su un branch, indistinguibile da lavoro completato. La verifica costa
+  dieci secondi e va fatta **prima** di marcare qualcosa come chiuso, non dopo:
+  è l'unico momento in cui è ancora gratis.
