@@ -54,6 +54,32 @@ aggiunta via PR, merge umano.
   contromisura di sicurezza ne annulla un'altra. E le tracce del freno non vanno
   legate all'utente: si scrivono prima di sapere se esiste.
 
+- 2026-07-27 — Quando un percorso **periodico** e un percorso **su richiesta**
+  condividono lo stesso predicato di selezione, chiediti: *questo percorso ha una
+  seconda occasione?* Il periodico ripassa e compensa, quindi può permettersi un
+  filtro del tipo «c'è qualcosa da fare?»; l'esecuzione su richiesta avviene una
+  volta sola e quel filtro la rende **fragile allo stato del momento**. Il rimedio
+  non è cambiare il predicato condiviso — romperebbe l'altro percorso — ma dare al
+  percorso senza compensazione un **passo in più**, dichiarato e testato.
+  Perché conta: nel caso reale la cancellazione di dati personali su richiesta non
+  toccava nessuna riga quando il campo era già vuoto, quindi non scriveva
+  l'evidenza; e siccome era l'evidenza ad armare il divieto di riscrittura, il dato
+  **rientrava** alla sincronizzazione successiva da una sorgente esterna. Tutti i
+  test verdi, l'adempimento dichiarato eseguito, e la sua durabilità dipendente da
+  come stava per caso quel campo in quell'istante.
+
+- 2026-07-27 — Un test che costruisce **esattamente** lo scenario difettoso ma
+  asserisce troppo poco è peggio di un test assente: occupa il posto di quello che
+  avrebbe morso, e la sua presenza nella lista fa credere che il caso sia coperto.
+  Corollario di metodo: per una funzionalità **nuova** il rosso «prima
+  dell'implementazione» è poco informativo (mancano import, colonne, tabelle —
+  esplode tutto). La copertura vera si misura per **mutazione**: si rompe un
+  invariante alla volta sul codice finito e si verifica *quale* test cade, e che sia
+  quello giusto.
+  Perché conta: è l'unico modo di distinguere una suite che *descrive* il codice da
+  una che lo *vincola*. Vale come autocontrollo prima di consegnare, non solo come
+  tecnica di chi rivede.
+
 - 2026-07-25 — Un'attività periodica (purge, retention, promemoria) si fa con la
   **coda di job durevole**, non con uno scheduler in memoria: l'handler si
   **riprogramma** alla fine di ogni esecuzione e un **bootstrap idempotente**
