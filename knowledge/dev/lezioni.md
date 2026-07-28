@@ -80,6 +80,35 @@ aggiunta via PR, merge umano.
   una che lo *vincola*. Vale come autocontrollo prima di consegnare, non solo come
   tecnica di chi rivede.
 
+- 2026-07-28 — Un test di concorrenza con `Barrier` può restare **verde perché i
+  contendenti non partono mai insieme**. La barriera allinea l'*istante* di
+  partenza, non il costo di ciò che viene dopo: la prima esecuzione paga
+  l'apertura della connessione, la compilazione della query da parte dell'ORM,
+  il primo caricamento di classi — costi abbastanza diversi fra thread da
+  scaglionarli oltre una finestra critica stretta. Rimedio: **eseguire una volta
+  il percorso sotto test e annullarlo (rollback) PRIMA della barriera**, così
+  tutti arrivano a caldo.
+  Perché conta: misurato su tre percorsi identici messi in gara con il vincolo
+  rimosso, il **primo** della lista — quello che pagava la compilazione per
+  tutti — restava verde in 6 giri su 6 mentre gli altri due cadevano subito. Con
+  il riscaldamento: 3 rossi su 3, in 5 giri su 5. Senza quella scoperta un terzo
+  della copertura di concorrenza sarebbe stato decorativo, e nessuno l'avrebbe
+  saputo — è il caso peggiore, perché il test *esiste* e quindi il rischio
+  risulta presidiato.
+
+- 2026-07-28 — Per dimostrare che un indice serve, **non riscrivere a mano la
+  query da spiegare**: intercetta l'istruzione realmente inviata al database
+  (hook «prima dell'esecuzione» del driver/ORM) mentre gira il percorso di
+  produzione, e chiedi il piano di *quella*, con quei parametri. E ottieni il
+  rosso nella **stessa esecuzione**: `DROP INDEX` dentro una transazione
+  annidata, rimisura, rollback (il DDL transazionale lo permette su PostgreSQL).
+  Perché conta: una query riscritta nel test resta indietro alla prima modifica
+  del codice e continua a passare misurando qualcosa che non esiste più. E un
+  test che asserisce «usa l'indice» senza aver mai visto il piano degradato non
+  distingue un indice utile da uno inutile — nel caso reale ha mostrato che dei
+  due percorsi sospetti **uno solo** era degradato, evitando di «correggere» ciò
+  che era già sano.
+
 - 2026-07-25 — Un'attività periodica (purge, retention, promemoria) si fa con la
   **coda di job durevole**, non con uno scheduler in memoria: l'handler si
   **riprogramma** alla fine di ogni esecuzione e un **bootstrap idempotente**
