@@ -10,6 +10,26 @@ aggiunta via PR, merge umano.
   Perché conta: <cosa succede se lo dimentichi>.
 -->
 
+- 2026-07-30 — **«Verde in isolamento» non significa «verde sul bersaglio del
+  merge».** Due rami paralleli possono essere entrambi corretti da soli e
+  incompatibili una volta uniti, senza che git segnali nulla: è un conflitto
+  **semantico**, e git vede solo quelli testuali. Il caso canonico sono le
+  **migrazioni di schema**: due story che aggiungono ciascuna «la prossima»
+  scelgono lo stesso numero e lo stesso genitore, ogni CI è verde, e l'albero
+  unito ha due teste — `alembic upgrade head` non sa più quale scegliere e si
+  ferma. Stessa forma: due voci con la stessa chiave in un catalogo di eventi o
+  di feature flag, due entry sullo stesso ordinale in un file di seed.
+  Perché conta: il rosso non compare su nessuna delle due PR, compare su `main`
+  dopo il merge — quando nessuno lo sta guardando e ogni verdetto successivo
+  nasce su una base rotta. Non basta la disciplina («controlla l'altra PR»):
+  serve una **guardia che giri sull'albero unito**, cioè un test nella suite
+  (GitHub costruisce le PR sul merge-ref, e il push a `main` lo verifica
+  comunque). Per le migrazioni: unicità degli ordinali **e** una sola testa —
+  il secondo controllo morde anche sulle forme che i nomi dei file non mostrano.
+  Corollario misurato: Alembic sui `revision` duplicati emette solo un
+  `UserWarning`, non un errore — affidarsi al fatto che «lo strumento se ne
+  accorge» non regge.
+
 - 2026-07-25 — Una convenzione trasversale (scoping multi-tenant, autenticazione
   obbligatoria, confini fra moduli) va imposta da un **test che cammina il
   codice**, non solo scritta nella documentazione: percorrere schema e route a
