@@ -93,3 +93,41 @@ aggiunta via PR, merge umano.
   Perché conta: rende la domanda «anticipiamo l'osservabilità?» decidibile con un argomento
   tecnico invece che con una preferenza. E toglie di mezzo il caso peggiore, in cui un requisito
   di affidabilità risulta verde in una matrice di tracciabilità senza che nulla lo verifichi.
+
+- 2026-07-30 — Un cancello di qualità va legato all'**artefatto immutabile** (lo SHA del
+  commit, la digest dell'immagine, la versione dell'oggetto), mai al contenitore mutabile
+  che lo ospita (la PR, il ramo, il tag). Motivo misurato, non teorico: subito dopo un push
+  già completato, l'API che descrive la PR ha continuato a riportare la head **precedente**
+  per qualche secondo. Ogni controllo del tipo «l'artefatto che sto giudicando è ancora
+  quello corrente?» è quindi una cortesia soggetta a una finestra di corsa, e non può essere
+  la garanzia. Se invece il verdetto è **attaccato allo SHA**, la finestra non è un buco: il
+  giudizio finisce sul commit vecchio e quello nuovo nasce senza, cioè non approvato — non
+  esiste ereditarietà da disattivare, e nessuno deve ricordarsi di invalidare niente.
+  Perché conta: è la differenza fra un'approvazione che scade da sola a ogni push e una che
+  resta appesa a un contenitore il cui contenuto è cambiato. La seconda forma è quella con
+  cui si mergia in buona fede una versione che nessuno ha guardato.
+
+- 2026-07-30 — Quando un cancello scrive **più di un artefatto**, l'ordine delle scritture è
+  parte del progetto di sicurezza e va asserito da un test, non lasciato all'implementazione.
+  Regola generale: la scrittura che **blocca** va per prima, quella che **sblocca** per
+  ultima e solo dopo che tutto il resto è riuscito. Così ogni guasto parziale — permessi,
+  rete, timeout a metà — atterra nello stato chiuso. Corollario spesso dimenticato: se la
+  scrittura «umana» (il commento, la review, la notifica) passa e quella «meccanica» no, va
+  pubblicata una **ritrattazione esplicita**, altrimenti resta in giro una pagina che afferma
+  un via libera che non esiste.
+  Perché conta: senza ordine dichiarato, metà dei percorsi di errore aprono il cancello per
+  inerzia, e sono esattamente i percorsi che nessuno prova a mano. Il test che li copre non è
+  «il caso raro»: è l'unico posto in cui quella decisione di progetto è scritta.
+
+- 2026-07-30 — Prima di progettare un'automazione sopra un servizio esterno, **prova le
+  chiamate reali con le credenziali reali**, anche quando l'API è documentatissima. Tre
+  vincoli trovati in mezz'ora su GitHub, tutti invisibili ai mock e tutti capaci di cambiare
+  il disegno: (1) i permessi di un token sono più granulari di come vengono descritti — poter
+  scrivere contenuti e pull request **non** implica poter scrivere gli stati di commit; (2)
+  un account non può approvare le proprie pull request (422), quindi se gli agenti pubblicano
+  con lo stesso account che apre le PR, la review formale non è una strada percorribile e va
+  scelto un artefatto diverso; (3) le letture possono essere in ritardo sulle scritture.
+  Perché conta: ognuno dei tre trasforma un requisito scritto in buona fede in un requisito
+  irrealizzabile. Scoprirli dopo aver costruito significa riprogettare; scoprirli prima
+  significa scegliere l'artefatto giusto al primo colpo. Il costo del banco di prova
+  usa-e-getta — un ramo e una PR aperta e chiusa — è due ordini di grandezza sotto.
