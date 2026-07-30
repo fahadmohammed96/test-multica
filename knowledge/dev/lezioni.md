@@ -80,6 +80,31 @@ aggiunta via PR, merge umano.
   una che lo *vincola*. Vale come autocontrollo prima di consegnare, non solo come
   tecnica di chi rivede.
 
+- 2026-07-30 — Sostituire una `DELETE` con una **transizione tracciata su riga
+  singola** può spostare in avanti la perdita di evidenza invece di chiuderla.
+  Chiediti: *questo ciclo può ripetersi?* Se sì, la riapertura riscrive le date
+  del giro precedente e l'evidenza dei giri passati sparisce comunque — solo più
+  tardi e più silenziosamente. La forma che chiude è il **registro**: una riga per
+  giro, con l'unicità spostata dall'entità alla riga **valida** (indice unico
+  **parziale** sul predicato «non revocata»), così l'invariante «una sola valida»
+  resta senza vietare la storia.
+  Perché conta: il caso reale era la conferma di lettura di un'informativa fiscale
+  cancellata quando l'utente rientrava sotto soglia. La riga portava la data in cui
+  l'utente era stato informato, cioè la prova dell'adempimento. Rimpiazzare la
+  `DELETE` con un campo «revocata il» sulla stessa riga sembra risolvere e passa
+  ogni test scritto su un solo giro: cade al secondo, e cade in silenzio.
+
+- 2026-07-30 — Una guardia strutturale che vieta le cancellazioni **per tabella** è
+  cieca a `session.delete(oggetto)`: una cancellazione di ISTANZA non dice
+  staticamente su quale tabella agisca. Serve la regola più stretta sul **modulo
+  proprietario** («qui non si cancella nulla, mai»). Corollario operativo:
+  aggiungere una tabella all'elenco protetto **senza** aggiungere il suo modulo a
+  quella seconda regola lascia la guardia verde proprio sulla forma del difetto che
+  la decisione voleva vietare.
+  Perché conta: la protezione sembra estesa, l'elenco cita la tabella nuova, tutti
+  i test sono verdi — e il difetto originale, reintrodotto identico, passa. Si
+  verifica in un modo solo: reintrodurre la cancellazione e pretendere il rosso.
+
 - 2026-07-25 — Un'attività periodica (purge, retention, promemoria) si fa con la
   **coda di job durevole**, non con uno scheduler in memoria: l'handler si
   **riprogramma** alla fine di ogni esecuzione e un **bootstrap idempotente**
