@@ -72,3 +72,43 @@ aggiunta via PR, merge umano.
   a marcire su un branch, indistinguibile da lavoro completato. La verifica costa
   dieci secondi e va fatta **prima** di marcare qualcosa come chiuso, non dopo:
   è l'unico momento in cui è ancora gratis.
+
+- 2026-08-03 — Un gate di validazione di mercato che si misura in **reazioni**
+  ("porta l'artefatto davanti a cinque clienti e osserva che faccia fanno") non è
+  un gate: si supera sempre. Le persone sono cortesi, e chi ha costruito la cosa
+  legge l'interesse dove c'è educazione. Sostituisci il giudizio con un
+  **impegno che costa qualcosa all'interlocutore** — conferire i propri dati,
+  fissare una data, versare un anticipo — e **fissa la soglia numerica prima**
+  di produrre l'artefatto.
+  Perché conta: sono due difetti distinti e si sommano. Senza una moneta, il gate
+  misura la simpatia di chi presenta; senza una soglia scritta prima, il criterio
+  si adatta al risultato ottenuto — «due su cinque interessati» diventa un
+  successo o un fallimento a seconda di quanto si è già investito. Un checkpoint
+  esiste per poter dire *no*: se non può fallire, hai pagato il costo di
+  costruirlo senza comprare l'informazione.
+
+- 2026-08-03 — Quando un documento elenca i criteri di una scelta **in ordine di
+  peso** e poi la scelta viene fatta, verifica esplicitamente il **criterio n.1**
+  contro l'opzione scelta. È quello che nessuno ricontrolla, proprio perché è
+  dichiarato il più importante e quindi sembra ovvio che sia stato rispettato.
+  Perché conta: gli altri criteri sono di solito osservabili sull'opzione
+  (omogeneità, dimensione, densità di lavoro manuale) e vengono discussi; il
+  primo è spesso una condizione su *chi sceglie*, non sull'opzione — «hai già
+  contatti lì dentro?» — e per questo scivola fuori dalla discussione. Se scopri
+  che è violato, non è detto che la scelta sia sbagliata: quasi sempre è la
+  **sequenza** a dover cambiare, perché colmare quel criterio ha un tempo di
+  maturazione che non si comprime lavorando di più.
+
+- 2026-08-03 — Un repository GitHub **appena creato è vuoto**: nessun commit,
+  nessun branch, quindi nessuna PR apribile — `main` non esiste finché qualcuno
+  non ci scrive. Se il tuo processo consegna via PR e vieta il push diretto sul
+  ramo principale, **verifica l'esistenza del branch base prima** di iniziare a
+  produrre l'artefatto, non quando è pronto da consegnare.
+  Perché conta: il blocco si scopre a lavoro finito, ed è l'unico caso in cui
+  l'unica via d'uscita è esattamente ciò che il processo vieta — un commit di
+  bootstrap sul ramo principale. Trenta secondi di verifica all'inizio ti fanno
+  chiedere all'umano di inizializzare il repo mentre lavori, invece di metterti a
+  scegliere tra due regole in conflitto alla fine. Stesso controllo per i
+  permessi del token: `contents: write` e `pull requests: write` sono
+  **permessi distinti**, e un token che pusha può benissimo non poter aprire la
+  PR.
