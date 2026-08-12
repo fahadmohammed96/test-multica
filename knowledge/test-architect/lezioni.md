@@ -93,3 +93,39 @@ aggiunta via PR, merge umano.
   Perché conta: rende la domanda «anticipiamo l'osservabilità?» decidibile con un argomento
   tecnico invece che con una preferenza. E toglie di mezzo il caso peggiore, in cui un requisito
   di affidabilità risulta verde in una matrice di tracciabilità senza che nulla lo verifichi.
+
+- 2026-08-12 — **Un cancello si interroga, non si deduce.** Un cancello *configurato* non è un
+  cancello *vincolante*, e la differenza non si vede da nessuna parte guardando il repository:
+  si vede solo interrogando il sistema che lo applica. Due forme viste sul campo, entrambe
+  sopravvissute per settimane: (1) un Quality Gate esterno citato come evidenza di copertura
+  riportava `0.0% Coverage on New Code` **e passava lo stesso** — la sua configurazione non
+  conteneva alcuna condizione sulla copertura, e quello 0.0% era l'assenza del dato, non un
+  esito; (2) i «check obbligatori» del repo erano in realtà i *job* del workflow di CI su un
+  ramo **completamente sprotetto** — nessuno di essi poteva impedire un merge, e il nome li
+  faceva sembrare cancelli. Regola operativa, una riga: **prima di citare un cancello come
+  evidenza, interrogalo** — la configurazione applicata (`GET .../branches/{b}`, la definizione
+  del quality gate, le condizioni attive), non il file che credi la descriva. E poi verificalo
+  **rompendo ciò che difende**: un cancello si consegna con la prova che *cade*, non con la
+  prova che passa.
+  Perché conta: il costo non è il difetto che passa, è la **dichiarazione**. Per settimane una
+  squadra intera ha chiuso consegne citando una garanzia che non esisteva, e nessuno mentiva —
+  nessuno aveva guardato. Un cancello mai interrogato è una firma che nessuno ha messo, e più
+  a lungo regge più decisioni ci si appoggiano sopra. Vale anche, e soprattutto, per i cancelli
+  che hai costruito tu: il modo tipico in cui questo errore entra è **dedurre la solidità di un
+  check dalla solidità degli altri**.
+
+- 2026-08-12 — **Le chiavi ordinate nel tempo fissano quale metà del codice viene esercitata.**
+  Con `uuidv7`, ULID, KSUID o seriali, gli identificatori crescono monotonicamente: la riga
+  creata per prima è **sempre** il `min` di una coppia canonicalizzata `(min(a,b), max(a,b))` —
+  ordinamento usato di continuo per chiavi simmetriche, lock ordinati anti-deadlock, vincoli di
+  unicità su relazioni non orientate, deduplica di coppie. Un test che agisce sistematicamente
+  sulla prima entità creata (o sempre sulla seconda) esercita quindi **una sola delle due
+  colonne/rami**, per costruzione e non per caso: la mutazione sull'altra sopravvive a suite
+  intere di test verdi. Presidi: nei test su chiavi simmetriche crea le entità in **entrambi gli
+  ordini**, oppure inietta gli id espliciti invece di lasciarli generare, e includi almeno un
+  caso in cui l'entità «vecchia» è il secondo membro della coppia.
+  Perché conta: è un buco di copertura che **non si vede leggendo i test** — ogni asserzione
+  sembra simmetrica, e anche la copertura di riga è al 100% perché la riga viene attraversata.
+  Si vede solo mutando il codice, o ragionando sull'ordinamento delle chiavi. E siccome
+  `uuidv7`/ULID sono ormai la scelta di default per le chiavi primarie, il difetto è
+  riproducibile su qualunque progetto nuovo che adotti quella convenzione.
